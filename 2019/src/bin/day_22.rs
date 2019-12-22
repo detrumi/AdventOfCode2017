@@ -42,27 +42,13 @@ fn main() {
         work_back(cards.len(), &techniques, part1)
     );
 
-    // let numbers: Vec<_> = (0..10_007)
-    //     .map(|n| work_back(10_007, &techniques, n))
-    //     .collect();
-    // eprintln!(
-    //     "numbers = {:?}",
-    //     numbers.iter().take(10).collect::<Vec<_>>()
-    // );
-
     let mut number = 2020;
     let mut found: HashSet<usize> = HashSet::new();
-    let mut last_number = number;
     for i in 0..100 {
         number = work_back(119_315_717_514_047, &techniques, number);
+        // number = work_back(10_007, &techniques, number);
         let is_new = found.insert(number);
-        println!(
-            "{}: number = {} {}",
-            i,
-            number,
-            number as i64 - last_number as i64
-        );
-        last_number = number;
+        println!("{}: number = {} {}", i, number, is_new);
         if !is_new {
             return;
         }
@@ -95,28 +81,9 @@ fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) ->
                     let additions = std::cmp::max((num_cards - num) / increment, 1);
                     num += additions * increment;
                     num %= num_cards;
-                    // eprintln!("{}: num = {:?}", base, num);
                     base += additions as u128;
                 }
                 position = ((position as u128 * base) % num_cards as u128) as usize;
-
-                // position = ((position as u128 * (num_cards - increment) as u128)
-                //     % num_cards as u128) as usize;
-
-                // let mut num = 0;
-                // let mut n = 0;
-                // while num != position {
-                //     let additions = if num % increment == position % increment {
-                //         1
-                //     } else {
-                //         (num_cards - num) / increment + 1
-                //     };
-                //     n += additions;
-                //     num += increment * additions;
-                //     num %= num_cards;
-                //     eprintln!("(n, num) = {:?}", (n, num));
-                // }
-                // position = n;
             }
         }
     }
