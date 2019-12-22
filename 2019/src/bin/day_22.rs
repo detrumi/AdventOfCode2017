@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -9,7 +10,7 @@ enum Technique {
 
 fn main() {
     let file = File::open("input/day_22.txt").unwrap();
-    let mut techniques: Vec<Technique> = io::BufReader::new(file)
+    let techniques: Vec<Technique> = io::BufReader::new(file)
         .lines()
         .map(|l| {
             let parts = l
@@ -36,8 +37,6 @@ fn main() {
     eprintln!("Part 1 = {}", part1);
     // eprintln!("cards = {:?}", cards);
 
-    techniques.reverse();
-
     eprintln!(
         "Part 2 test = {} (should be 2019)",
         work_back(cards.len(), &techniques, part1)
@@ -51,15 +50,27 @@ fn main() {
     //     numbers.iter().take(10).collect::<Vec<_>>()
     // );
 
-    // let mut number = 2020;
-    // for _ in 0..100 {
-    //     number = work_back(119_315_717_514_047, &techniques, number);
-    //     eprintln!("Part 2 = {:?}", number);
-    // }
+    let mut number = 2020;
+    let mut found: HashSet<usize> = HashSet::new();
+    let mut last_number = number;
+    for i in 0..100 {
+        number = work_back(119_315_717_514_047, &techniques, number);
+        let is_new = found.insert(number);
+        println!(
+            "{}: number = {} {}",
+            i,
+            number,
+            number as i64 - last_number as i64
+        );
+        last_number = number;
+        if !is_new {
+            return;
+        }
+    }
 }
 
 fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) -> usize {
-    for technique in techniques {
+    for technique in techniques.iter().rev() {
         match technique {
             Technique::Deal => position = num_cards - position - 1,
             Technique::Cut(cut) if *cut >= 0 => {
@@ -78,12 +89,34 @@ fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) ->
                 }
             }
             Technique::DealWithIncrement(increment) => {
-                eprintln!(
-                    "(position, num_cards, increment) = {:?}",
-                    (position, num_cards, increment)
-                );
-                position = ((position as u128 * (num_cards - increment) as u128)
-                    % num_cards as u128) as usize;
+                let mut num = 0;
+                let mut base = 0_u128;
+                while num != 1 {
+                    let additions = std::cmp::max((num_cards - num) / increment, 1);
+                    num += additions * increment;
+                    num %= num_cards;
+                    // eprintln!("{}: num = {:?}", base, num);
+                    base += additions as u128;
+                }
+                position = ((position as u128 * base) % num_cards as u128) as usize;
+
+                // position = ((position as u128 * (num_cards - increment) as u128)
+                //     % num_cards as u128) as usize;
+
+                // let mut num = 0;
+                // let mut n = 0;
+                // while num != position {
+                //     let additions = if num % increment == position % increment {
+                //         1
+                //     } else {
+                //         (num_cards - num) / increment + 1
+                //     };
+                //     n += additions;
+                //     num += increment * additions;
+                //     num %= num_cards;
+                //     eprintln!("(n, num) = {:?}", (n, num));
+                // }
+                // position = n;
             }
         }
     }
