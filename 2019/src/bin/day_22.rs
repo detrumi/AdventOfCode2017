@@ -1,4 +1,3 @@
-use std::collections::{HashSet, VecDeque};
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -35,38 +34,28 @@ fn main() {
     cards = shuffle(cards, &techniques);
     let part1 = cards.iter().position(|n| *n == 2019).unwrap();
     eprintln!("Part 1 = {}", part1);
+    // eprintln!("cards = {:?}", cards);
 
     techniques.reverse();
 
-    let part2 = work_back(119_315_717_514_047, &techniques, 2020);
-    eprintln!("Part 2 = {:?}", part2);
-    eprintln!("cards[2020] = {:?}", cards[2020]);
+    eprintln!(
+        "Part 2 test = {} (should be 2019)",
+        work_back(cards.len(), &techniques, part1)
+    );
 
-    let num_cards = 10;
-    let values = shuffle((0..num_cards).collect(), &techniques);
-    for i in 0..num_cards {
-        // eprintln!("{}: {}", i, values[i]);
-        eprintln!(
-            "{}: {}, {}",
-            i,
-            values[i],
-            work_back(num_cards, &techniques, i)
-        );
-    }
+    // let numbers: Vec<_> = (0..10_007)
+    //     .map(|n| work_back(10_007, &techniques, n))
+    //     .collect();
+    // eprintln!(
+    //     "numbers = {:?}",
+    //     numbers.iter().take(10).collect::<Vec<_>>()
+    // );
 
-    // for num in vec![1, 2, 10, 50, 9999, 10_006] {
-    //     // for num in 1..=100 {
-    //     let value = work_back(10_007, &techniques, num);
-    //     println!(
-    //         "{} should be {}, is {}, difference={}",
-    //         num,
-    //         cards[num],
-    //         value,
-    //         (value as i32 - cards[num] as i32)
-    //     );
+    // let mut number = 2020;
+    // for _ in 0..100 {
+    //     number = work_back(119_315_717_514_047, &techniques, number);
+    //     eprintln!("Part 2 = {:?}", number);
     // }
-
-    // let mut cards: Vec<usize> = (0..119_315_717_514_047).collect();
 }
 
 fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) -> usize {
@@ -82,29 +71,19 @@ fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) ->
             }
             Technique::Cut(cut) => {
                 let cut = -cut as usize;
-                if position > cut {
+                if position >= cut {
                     position -= cut;
                 } else {
                     position += num_cards - cut;
                 }
             }
             Technique::DealWithIncrement(increment) => {
-                // let group = (position - 1) / increment;
-                // let num_groups = f32::ceil((num_cards - 1) as f32 / *increment as f32) as usize;
-                // let index = (position - 1) % increment;
-                // eprintln!(
-                //     "(num_groups, group, index, (increment - 1 - index)) = {:?}",
-                //     (num_groups, group, index, (increment - 1 - index))
-                // );
-                // position = group + 1 + (increment - 1 - index) * increment;
-                // position %= num_cards;
-                // eprintln!("p={}, i={}", position, increment);
-                // position = (position + increment * (position % increment)) / increment;
-                // position = position / increment
-                //     + increment * (increment - 1 - (position + increment - 1) % increment);
-
-                position *= num_cards - increment;
-                position %= num_cards;
+                eprintln!(
+                    "(position, num_cards, increment) = {:?}",
+                    (position, num_cards, increment)
+                );
+                position = ((position as u128 * (num_cards - increment) as u128)
+                    % num_cards as u128) as usize;
             }
         }
     }
