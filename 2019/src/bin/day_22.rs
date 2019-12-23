@@ -1,3 +1,4 @@
+use num_bigint::BigUint;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -37,22 +38,47 @@ fn main() {
     eprintln!("Part 1 = {}", part1);
     // eprintln!("cards = {:?}", cards);
 
-    eprintln!(
-        "Part 2 test = {} (should be 2019)",
-        work_back(cards.len(), &techniques, part1)
-    );
+    part2();
 
-    let mut number = 2020;
-    let mut found: HashSet<usize> = HashSet::new();
-    for i in 0..100 {
-        number = work_back(119_315_717_514_047, &techniques, number);
-        // number = work_back(10_007, &techniques, number);
-        let is_new = found.insert(number);
-        println!("{}: number = {} {}", i, number, is_new);
-        if !is_new {
-            return;
-        }
-    }
+    // eprintln!(
+    //     "Part 2 test = {} (should be 2019)",
+    //     work_back(cards.len(), &techniques, part1)
+    // );
+
+    // let mut number = 2020;
+    // let mut found: HashSet<usize> = HashSet::new();
+    // for i in 0..100 {
+    //     number = work_back(119_315_717_514_047, &techniques, number);
+    //     // number = work_back(10_007, &techniques, number);
+    //     let is_new = found.insert(number);
+    //     println!("{}: number = {} {}", i, number, is_new);
+    //     if !is_new {
+    //         return;
+    //     }
+    // }
+}
+
+// Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
+fn part2() {
+    let x = BigUint::from(2_020_usize);
+    let a = BigUint::from(204_usize);
+    let b = BigUint::from(3_541_usize);
+    let p = BigUint::from(119_315_717_514_047_usize);
+    let n = BigUint::from(101_741_582_076_661_usize);
+
+    let a_to_n = a.modpow(&n, &p);
+
+    let one = BigUint::from(1_usize);
+    let division = moddiv(&(a_to_n.clone() - one.clone()), &(a - one), &p);
+
+    let result = (a_to_n * x + b * division) % p;
+    eprintln!("Part 2 = {}", result.to_string());
+}
+
+// (a/b) % p = ((a mod p) * (b^(p-2) mod p)) mod p
+fn moddiv(a: &BigUint, b: &BigUint, p: &BigUint) -> BigUint {
+    let right = b.modpow(&(p - BigUint::from(2_usize)), p);
+    (a * right) % p
 }
 
 fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) -> usize {

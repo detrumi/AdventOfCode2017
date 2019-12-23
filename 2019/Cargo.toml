@@ -11,6 +11,7 @@ num-integer = "0.1.41"
 rayon = "1.2.1"
 rand = "0.7.2"
 bit-vec = "0.6.1"
+num-bigint  = "0.2.3"
 
 [profile.release]
 debug = true
