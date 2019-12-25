@@ -78,11 +78,11 @@ fn main() {
 
 // Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
 fn part2() {
-    let x = BigUint::from(2_020_usize);
-    let a = BigUint::from(48116552563827_usize);
-    let b = BigUint::from(5113249733551_usize);
-    let p = BigUint::from(119_315_717_514_047_usize);
-    let n = BigUint::from(101_741_582_076_661_usize);
+    let x = BigUint::from(6978_usize);
+    let a = BigUint::from(204_usize);
+    let b = BigUint::from(3541_usize);
+    let p = BigUint::from(10007_usize);
+    let n = p.clone() - BigUint::from(1_usize);
 
     let a_to_n = a.modpow(&n, &p);
 
