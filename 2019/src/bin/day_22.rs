@@ -1,4 +1,4 @@
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint};
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -36,24 +36,42 @@ fn main() {
     cards = shuffle(cards, &techniques);
     let part1 = cards.iter().position(|n| *n == 2019).unwrap();
     eprintln!("Part 1 = {}", part1);
+
+    // let mut value = 2019;
+    // for _ in 0..10 {
+    //     value = work_forward(10_007, &techniques, value);
+    //     eprintln!("value = {:?}", value);
+    // }
+
     // eprintln!("cards = {:?}", cards);
+
+    // part2();
+
+    let num_cards = 119_315_717_514_047;
+    for i in 0..10 {
+        let value = work_forward(num_cards, &techniques, i);
+        eprintln!("value = {:?}", value);
+    }
 
     part2();
 
-    // eprintln!(
-    //     "Part 2 test = {} (should be 2019)",
-    //     work_back(cards.len(), &techniques, part1)
-    // );
-
-    // let mut number = 2020;
-    // let mut found: HashSet<usize> = HashSet::new();
-    // for i in 0..100 {
-    //     number = work_back(119_315_717_514_047, &techniques, number);
-    //     // number = work_back(10_007, &techniques, number);
-    //     let is_new = found.insert(number);
-    //     println!("{}: number = {} {}", i, number, is_new);
-    //     if !is_new {
-    //         return;
+    // let val = BigInt::from(41790941595554_i64);
+    // let expected1 = BigInt::from(44653370793617_i64);
+    // let expected2: BigInt = BigInt::from(16644877215659_i64);
+    // let p = BigInt::from(num_cards);
+    // for a in 2.. {
+    //     if a % 1000 == 0 {
+    //         eprintln!("a = {:?}", a);
+    //     }
+    //     let a = BigInt::from(a as i64);
+    //     let ax = a.clone() * val.clone();
+    //     for p_times in 0..=2 {
+    //         let b: BigInt = expected1.clone() + BigInt::from(p_times) * p.clone() - ax.clone();
+    //         let axb = (ax.clone() + b.clone()) % p.clone();
+    //         if (a.clone() * axb + b.clone()) % p.clone() == expected2 {
+    //             println!("a={},b={}", a, b);
+    //             return;
+    //         }
     //     }
     // }
 }
@@ -61,8 +79,8 @@ fn main() {
 // Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
 fn part2() {
     let x = BigUint::from(2_020_usize);
-    let a = BigUint::from(204_usize);
-    let b = BigUint::from(3_541_usize);
+    let a = BigUint::from(48116552563827_usize);
+    let b = BigUint::from(5113249733551_usize);
     let p = BigUint::from(119_315_717_514_047_usize);
     let n = BigUint::from(101_741_582_076_661_usize);
 
@@ -110,6 +128,34 @@ fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) ->
                     base += additions as u128;
                 }
                 position = ((position as u128 * base) % num_cards as u128) as usize;
+            }
+        }
+    }
+    position
+}
+
+fn work_forward(num_cards: usize, techniques: &[Technique], mut position: usize) -> usize {
+    for technique in techniques {
+        match technique {
+            Technique::Deal => position = num_cards - position - 1,
+            Technique::Cut(cut) if *cut >= 0 => {
+                if position >= *cut as usize {
+                    position -= *cut as usize;
+                } else {
+                    position += num_cards - *cut as usize;
+                }
+            }
+            Technique::Cut(cut) => {
+                let cut = -cut as usize;
+                if position >= num_cards - cut {
+                    position -= num_cards - cut;
+                } else {
+                    position += cut;
+                }
+            }
+            Technique::DealWithIncrement(increment) => {
+                position *= increment;
+                position %= num_cards;
             }
         }
     }
