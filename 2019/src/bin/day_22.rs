@@ -48,6 +48,7 @@ fn main() {
     // part2();
 
     let num_cards = 119_315_717_514_047;
+    // b = f(0), a = f(1) - f(0)
     for i in 0..10 {
         let value = work_forward(num_cards, &techniques, i);
         eprintln!("value = {:?}", value);
@@ -78,16 +79,16 @@ fn main() {
 
 // Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
 fn part2() {
-    let x = BigUint::from(6978_usize);
-    let a = BigUint::from(204_usize);
-    let b = BigUint::from(3541_usize);
-    let p = BigUint::from(10007_usize);
-    let n = p.clone() - BigUint::from(1_usize);
+    let x = BigUint::from(2020_usize);
+    let a = BigUint::from(48116552563827_usize);
+    let b = BigUint::from(5113249733551_usize);
+    let p = BigUint::from(119315717514047_usize);
+    let n = &p - BigUint::from(101741582076661_usize);
 
     let a_to_n = a.modpow(&n, &p);
 
     let one = BigUint::from(1_usize);
-    let division = moddiv(&(a_to_n.clone() - one.clone()), &(a - one), &p);
+    let division = moddiv(&(&a_to_n - &one), &(&a - &one), &p) % &p;
 
     let result = (a_to_n * x + b * division) % p;
     eprintln!("Part 2 = {}", result.to_string());
@@ -97,41 +98,6 @@ fn part2() {
 fn moddiv(a: &BigUint, b: &BigUint, p: &BigUint) -> BigUint {
     let right = b.modpow(&(p - BigUint::from(2_usize)), p);
     (a * right) % p
-}
-
-fn work_back(num_cards: usize, techniques: &[Technique], mut position: usize) -> usize {
-    for technique in techniques.iter().rev() {
-        match technique {
-            Technique::Deal => position = num_cards - position - 1,
-            Technique::Cut(cut) if *cut >= 0 => {
-                if position >= num_cards - *cut as usize {
-                    position -= num_cards - *cut as usize;
-                } else {
-                    position += *cut as usize;
-                }
-            }
-            Technique::Cut(cut) => {
-                let cut = -cut as usize;
-                if position >= cut {
-                    position -= cut;
-                } else {
-                    position += num_cards - cut;
-                }
-            }
-            Technique::DealWithIncrement(increment) => {
-                let mut num = 0;
-                let mut base = 0_u128;
-                while num != 1 {
-                    let additions = std::cmp::max((num_cards - num) / increment, 1);
-                    num += additions * increment;
-                    num %= num_cards;
-                    base += additions as u128;
-                }
-                position = ((position as u128 * base) % num_cards as u128) as usize;
-            }
-        }
-    }
-    position
 }
 
 fn work_forward(num_cards: usize, techniques: &[Technique], mut position: usize) -> usize {
