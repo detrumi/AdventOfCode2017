@@ -35,11 +35,12 @@ fn main() {
     cards = shuffle(cards, &techniques);
     let part1 = cards.iter().position(|n| *n == 2019).unwrap();
     eprintln!("Part 1 = {}", part1);
-    eprintln!("cards[0] = {:?}", cards[0]);
+    let n = 10006;
+    eprintln!("cards[{}] = {:?}", n, cards[n]);
     cards = shuffle(cards, &techniques);
-    eprintln!("cards[0] = {:?}", cards[0]);
+    eprintln!("cards[{}] = {:?}", n, cards[n]);
     cards = shuffle(cards, &techniques);
-    eprintln!("cards[0] = {:?}", cards[0]);
+    eprintln!("cards[{}] = {:?}", n, cards[n]);
 
     // let mut value = 2019;
     // for _ in 0..10 {
@@ -85,18 +86,17 @@ fn main() {
 // f(x) = ax+b => f^-1(x) = (x-b)/a
 // Applying n times => a^-n * (x - b) - b * ((a^(n+1) - 1) / (a - 1))
 fn part2() {
-    // let x = &BigUint::from(2020_usize);
-    // let a = &BigUint::from(48116552563827_usize);
-    // let b = &BigUint::from(5113249733551_usize);
-    // let p = &BigUint::from(119315717514047_usize);
-    // let n = &(p - BigUint::from(101741582076661_usize));
-    // let n = &BigUint::from(101741582076661_usize);
+    let x = &BigUint::from(2020_usize);
+    let a = &BigUint::from(48116552563827_usize);
+    let b = &BigUint::from(5113249733551_usize);
+    let p = &BigUint::from(119315717514047_usize);
+    let n = &BigUint::from(101741582076661_usize);
 
-    let x = &BigUint::from(0_usize);
-    let a = &BigUint::from(3541_usize);
-    let b = &BigUint::from(204_usize);
-    let p = &BigUint::from(10007_usize);
-    let n = &BigUint::from(2_usize);
+    // let x = &BigUint::from(10006_usize);
+    // let a = &BigUint::from(3541_usize);
+    // let b = &BigUint::from(204_usize);
+    // let p = &BigUint::from(10007_usize);
+    // let n = &BigUint::from(2_usize);
 
     let one = &BigUint::from(1_usize);
 
