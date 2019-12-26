@@ -1,5 +1,4 @@
-use num_bigint::{BigInt, BigUint};
-use std::collections::HashSet;
+use num_bigint::BigUint;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -36,6 +35,11 @@ fn main() {
     cards = shuffle(cards, &techniques);
     let part1 = cards.iter().position(|n| *n == 2019).unwrap();
     eprintln!("Part 1 = {}", part1);
+    eprintln!("cards[0] = {:?}", cards[0]);
+    cards = shuffle(cards, &techniques);
+    eprintln!("cards[0] = {:?}", cards[0]);
+    cards = shuffle(cards, &techniques);
+    eprintln!("cards[0] = {:?}", cards[0]);
 
     // let mut value = 2019;
     // for _ in 0..10 {
@@ -78,19 +82,33 @@ fn main() {
 }
 
 // Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
+// f(x) = ax+b => f^-1(x) = (x-b)/a
+// Applying n times => a^-n * (x - b) - b * ((a^(n+1) - 1) / (a - 1))
 fn part2() {
-    let x = BigUint::from(2020_usize);
-    let a = BigUint::from(48116552563827_usize);
-    let b = BigUint::from(5113249733551_usize);
-    let p = BigUint::from(119315717514047_usize);
-    let n = &p - BigUint::from(101741582076661_usize);
+    // let x = &BigUint::from(2020_usize);
+    // let a = &BigUint::from(48116552563827_usize);
+    // let b = &BigUint::from(5113249733551_usize);
+    // let p = &BigUint::from(119315717514047_usize);
+    // let n = &(p - BigUint::from(101741582076661_usize));
+    // let n = &BigUint::from(101741582076661_usize);
 
-    let a_to_n = a.modpow(&n, &p);
+    let x = &BigUint::from(0_usize);
+    let a = &BigUint::from(3541_usize);
+    let b = &BigUint::from(204_usize);
+    let p = &BigUint::from(10007_usize);
+    let n = &BigUint::from(2_usize);
 
-    let one = BigUint::from(1_usize);
-    let division = moddiv(&(&a_to_n - &one), &(&a - &one), &p) % &p;
+    let one = &BigUint::from(1_usize);
 
+    let a_to_n = &a.modpow(n, p);
+    let division = moddiv(&(a_to_n - one), &(a - one), p);
     let result = (a_to_n * x + b * division) % p;
+
+    // let a_to_minus_n = &moddiv(one, &a.modpow(n, p), p);
+    // let a_to_n_plus_1 = &a.modpow(&(n + one), p);
+    // let division = moddiv(&(a_to_n_plus_1 - one), &(a - one), p);
+    // let result = (a_to_minus_n * (x + p - b) - b * division) % p;
+
     eprintln!("Part 2 = {}", result.to_string());
 }
 
