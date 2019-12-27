@@ -35,31 +35,31 @@ fn main() {
     cards = shuffle(cards, &techniques);
     let part1 = cards.iter().position(|n| *n == 2019).unwrap();
     eprintln!("Part 1 = {}", part1);
-    let n = 10006;
-    eprintln!("cards[{}] = {:?}", n, cards[n]);
-    cards = shuffle(cards, &techniques);
-    eprintln!("cards[{}] = {:?}", n, cards[n]);
-    cards = shuffle(cards, &techniques);
-    eprintln!("cards[{}] = {:?}", n, cards[n]);
 
-    // let mut value = 2019;
-    // for _ in 0..10 {
-    //     value = work_forward(10_007, &techniques, value);
-    //     eprintln!("value = {:?}", value);
+    // let mut cards: Vec<usize> = (0..10_007).collect();
+    // let x = 9000;
+    // for n in 1..10_007 {
+    //     cards = shuffle(cards, &techniques);
+    //     let calculated = calculate(x, 3541, 204, 10_007, n);
+    //     let is_same = cards[x].to_string() == calculated;
+    //     eprintln!("n={}: cards[{}] = {:?}, calculated={}, equal={}", n, x, cards[x], calculated, is_same);
+    //     assert!(is_same);
     // }
 
-    // eprintln!("cards = {:?}", cards);
-
-    // part2();
-
     let num_cards = 119_315_717_514_047;
-    // b = f(0), a = f(1) - f(0)
-    for i in 0..10 {
-        let value = work_forward(num_cards, &techniques, i);
-        eprintln!("value = {:?}", value);
-    }
+    let b = work_forward(num_cards, &techniques, 0); // 5_113_249_733_551
+    let a = work_forward(num_cards, &techniques, 1) - b; // 48_116_552_563_827
+    assert!((a * 2020 + b) % num_cards == work_forward(num_cards, &techniques, 2020));
 
-    part2();
+    // for i in 0..10 {
+    //     let value = work_forward(num_cards, &techniques, i);
+    //     let calculated = calculate(i, 48116552563827, 5113249733551, num_cards, 1);
+    //     let is_equal = value.to_string() == calculated;
+    //     eprintln!("{}: value={}, calculated={}, equal={}", i, value, calculated, is_equal);
+    //     assert!(is_equal);
+    // }
+
+    println!("Part 2 = {}", calculate(2020, a, b, num_cards, 101_741_582_076_661));
 
     // let val = BigInt::from(41790941595554_i64);
     // let expected1 = BigInt::from(44653370793617_i64);
@@ -85,20 +85,14 @@ fn main() {
 // Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
 // f(x) = ax+b => f^-1(x) = (x-b)/a
 // Applying n times => a^-n * (x - b) - b * ((a^(n+1) - 1) / (a - 1))
-fn part2() {
-    let x = &BigUint::from(2020_usize);
-    let a = &BigUint::from(48116552563827_usize);
-    let b = &BigUint::from(5113249733551_usize);
-    let p = &BigUint::from(119315717514047_usize);
-    let n = &BigUint::from(101741582076661_usize);
-
-    // let x = &BigUint::from(10006_usize);
-    // let a = &BigUint::from(3541_usize);
-    // let b = &BigUint::from(204_usize);
-    // let p = &BigUint::from(10007_usize);
-    // let n = &BigUint::from(2_usize);
-
+fn calculate(x: usize, a: usize, b: usize, p: usize, n: usize) -> String {
     let one = &BigUint::from(1_usize);
+
+    let x = &BigUint::from(x);
+    let a = &BigUint::from(a);
+    let b = &BigUint::from(b);
+    let p = &BigUint::from(p);
+    let n = &BigUint::from(n);
 
     let a_to_n = &a.modpow(n, p);
     let division = moddiv(&(a_to_n - one), &(a - one), p);
@@ -109,7 +103,7 @@ fn part2() {
     // let division = moddiv(&(a_to_n_plus_1 - one), &(a - one), p);
     // let result = (a_to_minus_n * (x + p - b) - b * division) % p;
 
-    eprintln!("Part 2 = {}", result.to_string());
+    result.to_string()
 }
 
 // (a/b) % p = ((a mod p) * (b^(p-2) mod p)) mod p
