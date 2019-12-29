@@ -1,4 +1,5 @@
 use mod_exp::mod_exp;
+use num_integer::Integer;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -31,33 +32,35 @@ fn main() {
         })
         .collect();
 
-    part1(&techniques);
+    let part1 = part1(&techniques);
+    println!("Part 1 = {}", part1);
 
     let num_cards = 10_007;
-    let b = work_forward(num_cards, &techniques, 0);
-    let a = work_forward(num_cards, &techniques, 1) - b;
+    let (a, b) = work_forward(num_cards, &techniques);
     eprintln!(
-        "(a, b, calculate(part1 as i128, a, b, num_cards, 1)) = {:?}",
-        (a, b, calculate(part1 as i128, a, b, num_cards, 1))
+        "Part 1 test: {}",
+        calculate(part1 as i128, a, b, num_cards, 1)
     );
-    assert!(calculate(part1 as i128, a, b, num_cards, 1) == 2019);
+    assert_eq!(calculate(part1 as i128, a, b, num_cards, 1), 2019);
 
     part2(&techniques);
 }
 
-fn part1(techniques: &Vec<Technique>) {
+fn part1(techniques: &Vec<Technique>) -> i128 {
     let num_cards: i128 = 10_007;
     let mut cards: Vec<usize> = (0..num_cards as usize).collect();
     cards = shuffle(cards, &techniques);
-    let part1 = cards.iter().position(|n| *n == 2019).unwrap();
-    eprintln!("Part 1 = {}", part1);
+    println!("{:?}", cards[0..10].iter().collect::<Vec<_>>());
+    cards.iter().position(|n| *n == 2019).unwrap() as i128
 }
 
 fn part2(techniques: &Vec<Technique>) {
     let num_cards: i128 = 119_315_717_514_047;
-    let b = work_forward(num_cards, &techniques, 0); // 5_113_249_733_551
-    let a = work_forward(num_cards, &techniques, 1) - b; // 48_116_552_563_827
-    assert!((a * 2020 + b) % num_cards == work_forward(num_cards, &techniques, 2020));
+    let (a, b) = work_forward(num_cards, &techniques);
+    // assert_eq!(
+    //     (a * 2020 + b) % num_cards,
+    //     work_forward(num_cards, &techniques, 2020)
+    // );
 
     println!(
         "Part 2 = {}",
@@ -75,36 +78,34 @@ fn calculate(x: i128, a: i128, b: i128, p: i128, n: i128) -> i128 {
 
 // (a/b) % p = ((a mod p) * (b^(p-2) mod p)) mod p
 fn moddiv(a: i128, b: i128, p: i128) -> i128 {
-    let right = mod_exp(b, p - 2, p);
-    (a * right) % p
+    (a * mod_exp(b, p - 2, p)) % p
 }
 
-fn work_forward(num_cards: i128, techniques: &[Technique], mut position: i128) -> i128 {
+fn work_forward(num_cards: i128, techniques: &[Technique]) -> (i128, i128) {
+    let mut a = 1;
+    let mut b = 0;
     for technique in techniques {
         match technique {
-            Technique::Deal => position = num_cards - position - 1,
-            Technique::Cut(cut) if *cut >= 0 => {
-                if position >= *cut as i128 {
-                    position -= *cut as i128;
-                } else {
-                    position += num_cards - *cut as i128;
-                }
+            Technique::Deal => {
+                a *= -1;
+                a %= num_cards;
+
+                b += a;
+                b %= num_cards;
             }
             Technique::Cut(cut) => {
-                let cut = -cut as i128;
-                if position >= num_cards - cut {
-                    position -= num_cards - cut;
-                } else {
-                    position += cut;
-                }
+                b += a * *cut as i128;
+                b %= num_cards;
             }
             Technique::DealWithIncrement(increment) => {
-                position *= *increment as i128;
-                position %= num_cards;
+                a *= moddiv(1, *increment as i128, num_cards);
+                a %= num_cards;
             }
         }
     }
-    position
+    b = (b + num_cards) % num_cards;
+    eprintln!("(a, b) = {:?}", (a, b));
+    (a, b)
 }
 
 fn shuffle(mut cards: Vec<usize>, techniques: &[Technique]) -> Vec<usize> {
