@@ -1,12 +1,11 @@
 use mod_exp::mod_exp;
-use num_integer::Integer;
 use std::fs::File;
 use std::io::{self, BufRead};
 
 enum Technique {
     Deal,
-    Cut(i32),
-    DealWithIncrement(usize),
+    Cut(i128),
+    DealWithIncrement(i128),
 }
 
 fn main() {
@@ -14,49 +13,34 @@ fn main() {
     let techniques: Vec<Technique> = io::BufReader::new(file)
         .lines()
         .map(|l| {
-            let parts = l
-                .unwrap()
-                .split(' ')
-                .map(|s| s.to_string())
-                .collect::<Vec<_>>();
+            let parts: Vec<String> = l.unwrap().split(' ').map(|s| s.to_string()).collect();
             if parts[1] == "into" {
                 Technique::Deal
             } else if parts[0] == "cut" {
-                Technique::Cut(parts[1].parse::<i32>().unwrap())
+                Technique::Cut(parts[1].parse::<i128>().unwrap())
             } else if parts[2] == "increment" {
-                let increment = parts[3].parse::<usize>().unwrap();
-                Technique::DealWithIncrement(increment)
+                Technique::DealWithIncrement(parts[3].parse::<i128>().unwrap())
             } else {
                 panic!()
             }
         })
         .collect();
 
-    let part1 = part1(&techniques);
-    println!("Part 1 = {}", part1);
-
-    let num_cards = 10_007;
-    let (a, b) = find_formula(num_cards, &techniques);
-    assert_eq!(calculate(part1 as i128, a, b, num_cards, 1), 2019);
-
-    println!("Part 2 = {}", part2(&techniques));
-}
-
-fn part1(techniques: &Vec<Technique>) -> i128 {
-    shuffle((0..10_007).collect(), &techniques)
+    let part1 = shuffle((0..10_007).collect(), &techniques)
         .iter()
         .position(|n| *n == 2019)
-        .unwrap() as i128
-}
+        .unwrap() as i128;
+    println!("Part 1 = {}", part1);
 
-fn part2(techniques: &Vec<Technique>) -> i128 {
-    let num_cards: i128 = 119_315_717_514_047;
-    let (a, b) = find_formula(num_cards, &techniques);
-    calculate(2020, a, b, num_cards, 101_741_582_076_661)
+    assert_eq!(calculate(part1, 10_007, &techniques, 1), 2019);
+
+    let part2 = calculate(2020, 119_315_717_514_047, &techniques, 101_741_582_076_661);
+    println!("Part 2 = {}", part2);
 }
 
 // Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
-fn calculate(x: i128, a: i128, b: i128, p: i128, n: i128) -> i128 {
+fn calculate(x: i128, p: i128, techniques: &[Technique], n: i128) -> i128 {
+    let (a, b) = find_formula(p, &techniques);
     let a_to_n = mod_exp(a, n, p);
     let left = x * a_to_n;
     let right = b * moddiv(a_to_n - 1, a - 1, p);
@@ -73,7 +57,7 @@ fn find_formula(num_cards: i128, techniques: &[Technique]) -> (i128, i128) {
     let mut a = 1;
     let mut b = 0;
     for technique in techniques {
-        match technique {
+        match *technique {
             Technique::Deal => {
                 a *= -1;
                 a %= num_cards;
@@ -82,39 +66,37 @@ fn find_formula(num_cards: i128, techniques: &[Technique]) -> (i128, i128) {
                 b %= num_cards;
             }
             Technique::Cut(cut) => {
-                b += a * *cut as i128;
+                b += a * cut;
                 b %= num_cards;
             }
             Technique::DealWithIncrement(increment) => {
-                a *= moddiv(1, *increment as i128, num_cards);
+                a *= moddiv(1, increment, num_cards);
                 a %= num_cards;
             }
         }
     }
-    a = (a + num_cards) % num_cards;
     b = (b + num_cards) % num_cards;
-    eprintln!("(a, b) = {:?}", (a, b));
     (a, b)
 }
 
-fn shuffle(mut cards: Vec<usize>, techniques: &[Technique]) -> Vec<usize> {
+fn shuffle(mut cards: Vec<i128>, techniques: &[Technique]) -> Vec<i128> {
     let num_cards = cards.len();
     for technique in techniques {
-        match technique {
+        match *technique {
             Technique::Deal => cards = cards.into_iter().rev().collect(),
             Technique::Cut(cut) => {
-                if *cut >= 0 {
-                    let mut new_cards: Vec<usize> =
-                        cards.iter().skip(*cut as usize).copied().collect();
-                    new_cards.extend(cards.drain(0..*cut as usize));
+                if cut >= 0 {
+                    let mut new_cards: Vec<i128> =
+                        cards.iter().skip(cut as usize).copied().collect();
+                    new_cards.extend(cards.drain(0..cut as usize));
                     cards = new_cards;
                 } else {
-                    let mut new_cards: Vec<usize> = cards
+                    let mut new_cards: Vec<i128> = cards
                         .iter()
-                        .skip((num_cards as i32 + cut) as usize)
+                        .skip(num_cards + cut as usize)
                         .copied()
                         .collect();
-                    new_cards.extend(cards.drain(0..(num_cards as i32 + cut) as usize));
+                    new_cards.extend(cards.drain(0..num_cards + cut as usize));
                     cards = new_cards;
                 }
             }
@@ -124,7 +106,7 @@ fn shuffle(mut cards: Vec<usize>, techniques: &[Technique]) -> Vec<usize> {
                 let mut current = 0;
                 for i in 0..num_cards {
                     new_cards[current] = cards[i];
-                    current = (current + increment) % num_cards;
+                    current = (current + increment as usize) % num_cards;
                 }
                 cards = new_cards;
             }
