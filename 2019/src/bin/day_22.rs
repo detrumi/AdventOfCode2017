@@ -36,36 +36,23 @@ fn main() {
     println!("Part 1 = {}", part1);
 
     let num_cards = 10_007;
-    let (a, b) = work_forward(num_cards, &techniques);
-    eprintln!(
-        "Part 1 test: {}",
-        calculate(part1 as i128, a, b, num_cards, 1)
-    );
+    let (a, b) = find_formula(num_cards, &techniques);
     assert_eq!(calculate(part1 as i128, a, b, num_cards, 1), 2019);
 
-    part2(&techniques);
+    println!("Part 2 = {}", part2(&techniques));
 }
 
 fn part1(techniques: &Vec<Technique>) -> i128 {
-    let num_cards: i128 = 10_007;
-    let mut cards: Vec<usize> = (0..num_cards as usize).collect();
-    cards = shuffle(cards, &techniques);
-    println!("{:?}", cards[0..10].iter().collect::<Vec<_>>());
-    cards.iter().position(|n| *n == 2019).unwrap() as i128
+    shuffle((0..10_007).collect(), &techniques)
+        .iter()
+        .position(|n| *n == 2019)
+        .unwrap() as i128
 }
 
-fn part2(techniques: &Vec<Technique>) {
+fn part2(techniques: &Vec<Technique>) -> i128 {
     let num_cards: i128 = 119_315_717_514_047;
-    let (a, b) = work_forward(num_cards, &techniques);
-    // assert_eq!(
-    //     (a * 2020 + b) % num_cards,
-    //     work_forward(num_cards, &techniques, 2020)
-    // );
-
-    println!(
-        "Part 2 = {}",
-        calculate(2020, a, b, num_cards, 101_741_582_076_661)
-    );
+    let (a, b) = find_formula(num_cards, &techniques);
+    calculate(2020, a, b, num_cards, 101_741_582_076_661)
 }
 
 // Applying ax+b n times = a^n * x + b * (a^n - 1) / (a - 1)
@@ -81,7 +68,8 @@ fn moddiv(a: i128, b: i128, p: i128) -> i128 {
     (a * mod_exp(b, p - 2, p)) % p
 }
 
-fn work_forward(num_cards: i128, techniques: &[Technique]) -> (i128, i128) {
+// Reduces multiple shuffling techniques to (a,b) for which shuffling = a*x+b
+fn find_formula(num_cards: i128, techniques: &[Technique]) -> (i128, i128) {
     let mut a = 1;
     let mut b = 0;
     for technique in techniques {
@@ -103,6 +91,7 @@ fn work_forward(num_cards: i128, techniques: &[Technique]) -> (i128, i128) {
             }
         }
     }
+    a = (a + num_cards) % num_cards;
     b = (b + num_cards) % num_cards;
     eprintln!("(a, b) = {:?}", (a, b));
     (a, b)
